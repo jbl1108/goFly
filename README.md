@@ -1,2 +1,2 @@
 # goFly
-This is th readme file for goFly
+This is the readme file for goFly
