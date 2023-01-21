@@ -7,7 +7,8 @@ import (
 	"net/http"
 )
 
-type Message interface{}
+type Message interface {
+}
 
 func Request(url string) (result Message, err error) {
 	var resp *http.Response

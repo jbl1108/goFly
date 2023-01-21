@@ -5,6 +5,12 @@ import (
 	"net/http"
 )
 
+func Start() {
+	http.HandleFunc("/gofly", gofly)
+	http.HandleFunc("/going", going)
+	http.ListenAndServe(":8000", nil)
+}
+
 func gofly(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, getJson())
 }
@@ -14,9 +20,7 @@ func going(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/gofly", gofly)
-	http.HandleFunc("/going", going)
-	http.ListenAndServe(":8000", nil)
+	Start()
 }
 
 func getJson() (b string) {
