@@ -1,4 +1,4 @@
-package main
+package restservice
 
 import (
 	"io"
@@ -17,10 +17,6 @@ func gofly(w http.ResponseWriter, r *http.Request) {
 
 func going(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "going!")
-}
-
-func main() {
-	Start()
 }
 
 func getJson() (b string) {
