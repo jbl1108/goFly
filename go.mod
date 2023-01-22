@@ -2,4 +2,10 @@ module github.com/jbl1108/goFly
 
 go 1.18
 
-require github.com/jbl1108/goFly/flyclient v0.0.0-20230121085326-043c7fbd14a2
+require github.com/eclipse/paho.mqtt.golang v1.4.2
+
+require (
+	github.com/gorilla/websocket v1.4.2 // indirect
+	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+)
