@@ -4,28 +4,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 type Message interface {
 }
 
-type restClient struct {
+type RestClient struct {
 }
 
-func NewRestClient() *restClient {
-	restClient := new(restClient)
+func NewRestClient() *RestClient {
+	restClient := new(RestClient)
 	return restClient
 }
 
-func (m *restClient) Request(url string) (result Message, err error) {
+func (m *RestClient) Request(url string, header map[string]string) (result Message, err error) {
 	var resp *http.Response
 	var body []byte
 
-	resp, err = http.Get(url)
+	client := http.Client{}
+	log.Printf("request to: %s", url)
+	req, err := http.NewRequest("GET", url, nil)
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+	resp, err = client.Do(req)
 
 	if err != nil {
-		defer resp.Body.Close()
 		return
 	}
 	defer resp.Body.Close()

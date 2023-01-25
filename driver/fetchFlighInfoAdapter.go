@@ -1,37 +1,38 @@
 package driver
 
 import (
+	"time"
+
 	"github.com/jbl1108/goFly/usecase"
+	"github.com/jbl1108/goFly/util"
 )
 
 type newFetchFlightInfoAdapter struct {
-	restClient       restClient
-	mqttCommunicator MQTTCommunicator
-	aviationHost     string
+	restClient       *RestClient
+	mqttCommunicator *MQTTCommunicator
+	config           *util.Config
 }
 
-func NewFetchFlightInfoAdapter(aviationHost string, mqqttHost string) *newFetchFlightInfoAdapter {
+func NewFetchFlightInfoAdapter(config *util.Config, restClient *RestClient) *newFetchFlightInfoAdapter {
 	newFetchFlightInfoAdapter := new(newFetchFlightInfoAdapter)
-	newFetchFlightInfoAdapter.restClient = *NewRestClient()
-	newFetchFlightInfoAdapter.aviationHost = aviationHost
-	newFetchFlightInfoAdapter.mqttCommunicator = *NewMQTTCommunicator(mqqttHost, "flyinfo")
+	newFetchFlightInfoAdapter.config = config
+	newFetchFlightInfoAdapter.restClient = restClient
 	return newFetchFlightInfoAdapter
 }
 
 func (m *newFetchFlightInfoAdapter) Start() error {
 	return m.mqttCommunicator.Start()
 }
-func (m *newFetchFlightInfoAdapter) RegisterMessageListener(topic string, listener func(message string)) {
 
-}
-func (m *newFetchFlightInfoAdapter) PostMessage(message string, receiver string) error {
+func (m *newFetchFlightInfoAdapter) PostMessage(message []usecase.FlightData) error {
 	return nil
 }
 
-func (m *newFetchFlightInfoAdapter) SendRequest(message string) ([]usecase.FlightData, error) {
+func (m *newFetchFlightInfoAdapter) SendFlightRequest(flightCode string, startDate time.Time, endDate time.Time) ([]usecase.FlightData, error) {
 	parser := NewFlightDataParser()
-	response, err := m.restClient.Request(m.aviationHost)
-	if err == nil {
+	var request = m.config.FlightInfoRequest() + "/" + flightCode + "?start=" + startDate.Format(time.RFC3339) + "&end=" + endDate.Format(time.RFC3339)
+	response, err := m.restClient.Request(request, map[string]string{"x-key": m.config.FlightInfoKey()})
+	if err != nil {
 		return nil, err
 	} else {
 		return parser.ParseData(response)

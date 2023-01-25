@@ -3,12 +3,16 @@ package restservice
 import (
 	"io"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func Start() {
+	r := mux.NewRouter()
 	http.HandleFunc("/gofly", gofly)
-	http.HandleFunc("/flight", flight)
-	http.ListenAndServe(":8000", nil)
+	http.HandleFunc("/flights/{id}", flight)
+	http.HandleFunc("/flights/KL200", flight)
+	http.ListenAndServe(":8000", r)
 }
 
 func gofly(w http.ResponseWriter, r *http.Request) {

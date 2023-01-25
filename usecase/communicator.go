@@ -1,7 +1,8 @@
 package usecase
 
+import "time"
+
 type Communicator interface {
-	RegisterMessageListener(topic string, listener func(message string))
-	PostMessage(message string, receiver string) (error, string)
-	SendFlightRequest(request string, response FlightData) ([]FlightData, error)
+	PostMessage(message []FlightData) error
+	SendFlightRequest(flightCode string, startDate time.Time, endDate time.Time) ([]FlightData, error)
 }

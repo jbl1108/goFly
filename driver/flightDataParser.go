@@ -1,8 +1,6 @@
 package driver
 
 import (
-	"fmt"
-
 	"github.com/jbl1108/goFly/usecase"
 )
 
@@ -16,7 +14,6 @@ func NewFlightDataParser() *FligthDataParser {
 
 func (m *FligthDataParser) ParseData(message Message) ([]usecase.FlightData, error) {
 	resultMap := message.(map[string]interface{})["flights"].([]interface{})
-	fmt.Println(resultMap)
 	var returnValue []usecase.FlightData
 	for _, v := range resultMap {
 		valueMap := v.(map[string]interface{})
@@ -24,7 +21,6 @@ func (m *FligthDataParser) ParseData(message Message) ([]usecase.FlightData, err
 		var departure_delay = valueMap["departure_delay"].(float64)
 		returnValue = append(returnValue, usecase.FlightData{
 			Departure_delay: departure_delay, Arrival_delay: arrival_delay})
-
 	}
 
 	return returnValue, nil
