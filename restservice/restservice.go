@@ -2,6 +2,7 @@ package restservice
 
 import (
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -9,10 +10,14 @@ import (
 
 func Start() {
 	r := mux.NewRouter()
-	http.HandleFunc("/gofly", gofly)
-	http.HandleFunc("/flights/{id}", flight)
-	http.HandleFunc("/flights/KL200", flight)
+	r.HandleFunc("/gofly", gofly)
+	r.HandleFunc("/flights/{id}", flight)
+	r.NotFoundHandler = http.HandlerFunc(notFound)
 	http.ListenAndServe(":8000", r)
+}
+
+func notFound(w http.ResponseWriter, r *http.Request) {
+	log.Print("not found: " + r.RequestURI)
 }
 
 func gofly(w http.ResponseWriter, r *http.Request) {

@@ -1,10 +1,13 @@
 package driver
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/jbl1108/goFly/usecase"
 	"github.com/jbl1108/goFly/util"
+	"go.uber.org/multierr"
 )
 
 type newFetchFlightInfoAdapter struct {
@@ -13,10 +16,11 @@ type newFetchFlightInfoAdapter struct {
 	config           *util.Config
 }
 
-func NewFetchFlightInfoAdapter(config *util.Config, restClient *RestClient) *newFetchFlightInfoAdapter {
+func NewFetchFlightInfoAdapter(config *util.Config, restClient *RestClient, mqttClient *MQTTCommunicator) *newFetchFlightInfoAdapter {
 	newFetchFlightInfoAdapter := new(newFetchFlightInfoAdapter)
 	newFetchFlightInfoAdapter.config = config
 	newFetchFlightInfoAdapter.restClient = restClient
+	newFetchFlightInfoAdapter.mqttCommunicator = mqttClient
 	return newFetchFlightInfoAdapter
 }
 
@@ -25,7 +29,18 @@ func (m *newFetchFlightInfoAdapter) Start() error {
 }
 
 func (m *newFetchFlightInfoAdapter) PostMessage(message []usecase.FlightData) error {
-	return nil
+	var errors error
+	for _, flight := range message {
+		json := m.generateJson(flight)
+		log.Printf("Post message : %s", json)
+		err := m.mqttCommunicator.SendMessage(json, "flight")
+		errors = multierr.Append(errors, err)
+	}
+	return errors
+}
+
+func (m *newFetchFlightInfoAdapter) generateJson(flight usecase.FlightData) string {
+	return fmt.Sprintf("{\"flight\" : \"%s\" , \"flightDate\" : \"%s\" , \"arrivalDelay\" : %f , \"departureDelay\" : %f }", flight.IataFlightCode, flight.FlightDate, flight.ArrivalDelay, flight.DepartureDelay)
 }
 
 func (m *newFetchFlightInfoAdapter) SendFlightRequest(flightCode string, startDate time.Time, endDate time.Time) ([]usecase.FlightData, error) {

@@ -2,11 +2,18 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"strconv"
+	"time"
+
 	"github.com/jbl1108/goFly/driver"
 	"github.com/jbl1108/goFly/restservice"
 	"github.com/jbl1108/goFly/usecase"
 	"github.com/jbl1108/goFly/util"
 )
+
+var newFlightInfoFetcher *usecase.FlightInfoFetchUsecase
 
 func main() {
 
@@ -27,11 +34,39 @@ func main() {
 	var config = util.NewConfig()
 	var restClient = driver.NewRestClient()
 	var persister = driver.NewRedisDriver(config)
-	var newFetchFlightInfoAdapter = driver.NewFetchFlightInfoAdapter(config, restClient)
-	var newFlightInfoFetcher = usecase.NewFlightInfoFetcher(newFetchFlightInfoAdapter, persister)
+	var mqqtClient = driver.NewMQTTCommunicator(config.MQTTHost() + ":" + strconv.Itoa(config.MQTTPort()))
+	var newFetchFlightInfoAdapter = driver.NewFetchFlightInfoAdapter(config, restClient, mqqtClient)
+	newFlightInfoFetcher = usecase.NewFlightInfoFetcher(newFetchFlightInfoAdapter, persister)
 	persister.StoreString(util.KEY_START_DATE, util.DEFAULT_START_DATE)
 	persister.StoreString(util.KEY_END_DATE, util.DEFAULT_END_DATE)
 	persister.StoreList(util.KEY_FLIGTH, []string{util.DEFAULT_FLIGHT})
+	err := newFlightInfoFetcher.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	startFetcher()
+}
 
-	newFlightInfoFetcher.Start()
+func startFetcher() {
+
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+
+	mychannel := make(chan bool)
+
+	go func() {
+		fmt.Println("Press the Enter Key to stop anytime")
+		fmt.Scanln()
+		mychannel <- true
+	}()
+	for {
+		select {
+		// Case statement
+		case <-mychannel:
+			return
+		case <-ticker.C:
+			newFlightInfoFetcher.Fetch()
+		}
+	}
+
 }

@@ -1,21 +1,17 @@
 package driver
 
 import (
-	"log"
-
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
 type MQTTCommunicator struct {
 	messageListener   func(message string)
 	brokerHostAddress string
-	topic             string
 }
 
-func NewMQTTCommunicator(brokerHostAddress string, topic string) *MQTTCommunicator {
+func NewMQTTCommunicator(brokerHostAddress string) *MQTTCommunicator {
 	mqttcommunicator := new(MQTTCommunicator)
 	mqttcommunicator.brokerHostAddress = brokerHostAddress
-	mqttcommunicator.topic = topic
 	return mqttcommunicator
 }
 
@@ -45,15 +41,15 @@ func (m *MQTTCommunicator) Start() error {
 
 	//subscribe to the topic catdata and request messages to be delivered
 	//at a maximum qos of zero, wait for the receipt to confirm the subscription
-	if token := mqttClient.Subscribe(m.topic, 0, nil); token.Wait() && token.Error() != nil {
-		return token.Error()
-	}
+	// if token := mqttClient.Subscribe(m.topic, 0, nil); token.Wait() && token.Error() != nil {
+	// 	return token.Error()
+	// }
 	return nil
 }
 func (m *MQTTCommunicator) Stop() {
-	if token := mqttClient.Unsubscribe(m.topic); token.Wait() && token.Error() != nil {
-		log.Printf("Error disconnecting: %v", token.Error())
-	}
+	// if token := mqttClient.Unsubscribe(m.topic); token.Wait() && token.Error() != nil {
+	// 	log.Printf("Error disconnecting: %v", token.Error())
+	// }
 
 	mqttClient.Disconnect(250)
 
