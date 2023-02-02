@@ -1,6 +1,9 @@
 package driver
 
 import (
+	"log"
+	"time"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -28,13 +31,19 @@ func (m *MQTTCommunicator) SendMessage(message string, receiver string) error {
 
 func (m *MQTTCommunicator) Start() error {
 	opts := MQTT.NewClientOptions().AddBroker(m.brokerHostAddress)
-	opts.SetClientID("go-simple")
+	opts.SetClientID("goFly client")
+	opts.SetKeepAlive(2 * time.Second)
+	opts.SetConnectionLostHandler(func(client MQTT.Client, err error) {
+		log.Printf("[CONNECTION LOST HANDLER] %v", err)
+	})
+
 	var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		m.messageListener(string(msg.Payload()))
 	}
 	opts.SetDefaultPublishHandler(f)
 	//create and start a client using the above ClientOptions
 	mqttClient = MQTT.NewClient(opts)
+
 	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
 		return token.Error()
 	}

@@ -32,15 +32,16 @@ func (m *newFetchFlightInfoAdapter) PostMessage(message []usecase.FlightData) er
 	var errors error
 	for _, flight := range message {
 		json := m.generateJson(flight)
-		log.Printf("Post message : %s", json)
-		err := m.mqttCommunicator.SendMessage(json, "flight")
+		topic := "flight/" + flight.IataFlightCode
+		log.Printf("Post topic: %s, message : %s", topic, json)
+		err := m.mqttCommunicator.SendMessage(json, topic)
 		errors = multierr.Append(errors, err)
 	}
 	return errors
 }
 
 func (m *newFetchFlightInfoAdapter) generateJson(flight usecase.FlightData) string {
-	return fmt.Sprintf("{\"flight\" : \"%s\" , \"flightDate\" : \"%s\" , \"arrivalDelay\" : %f , \"departureDelay\" : %f }", flight.IataFlightCode, flight.FlightDate, flight.ArrivalDelay, flight.DepartureDelay)
+	return fmt.Sprintf("{\"time\" : \"%s\" , \"text_flightDate\" : \"%s\" , \"arrivalDelay\" : %f , \"departureDelay\" : %f }", flight.FlightDate.Format(time.RFC3339), flight.FlightDate.Format(time.RFC3339), flight.ArrivalDelay, flight.DepartureDelay)
 }
 
 func (m *newFetchFlightInfoAdapter) SendFlightRequest(flightCode string, startDate time.Time, endDate time.Time) ([]usecase.FlightData, error) {
