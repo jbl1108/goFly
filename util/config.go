@@ -24,8 +24,8 @@ func (config *Config) MQTTHost() string {
 	return config.prop.GetString("mqtt_host", "localhost")
 }
 
-func (config *Config) MQTTQueue() string {
-	return config.prop.GetString("mqtt_queue", "gofly")
+func (config *Config) MQTTTopic() string {
+	return config.prop.GetString("mqtt_topic", "gofly")
 }
 
 func (config *Config) MQTTPort() int {
