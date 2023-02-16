@@ -4,7 +4,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/jbl1108/goFly/driver"
@@ -34,7 +33,7 @@ func main() {
 	var config = util.NewConfig()
 	var restClient = driver.NewRestClient()
 	var persister = driver.NewRedisDriver(config)
-	var mqqtClient = driver.NewMQTTCommunicator(config.MQTTHost() + ":" + strconv.Itoa(config.MQTTPort()))
+	var mqqtClient = driver.NewMQTTCommunicator(config.MQTTAddr())
 	var newFetchFlightInfoAdapter = driver.NewFetchFlightInfoAdapter(config, restClient, mqqtClient)
 	newFlightInfoFetcher = usecase.NewFlightInfoFetcher(newFetchFlightInfoAdapter, persister)
 	persister.StoreString(util.KEY_START_DATE, util.DEFAULT_START_DATE)
