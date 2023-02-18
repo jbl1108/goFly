@@ -1,6 +1,6 @@
-package usecase
+package ports
 
-type Persistance interface {
+type KeyValueStore interface {
 	StoreString(key string, value string) error
 	FetchString(key string) (string, error)
 	StoreList(key string, value []string) error

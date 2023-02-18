@@ -1,4 +1,4 @@
-package driver
+package gateways
 
 import (
 	"encoding/json"

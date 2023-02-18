@@ -1,4 +1,4 @@
-package driver
+package repositories
 
 import (
 	"context"
@@ -7,13 +7,13 @@ import (
 	"github.com/jbl1108/goFly/util"
 )
 
-type RedisDriver struct {
+type RedisRepository struct {
 	client *redis.Client
 	config *util.Config
 }
 
-func NewRedisDriver(config *util.Config) *RedisDriver {
-	restClient := new(RedisDriver)
+func NewRedisRepository(config *util.Config) *RedisRepository {
+	restClient := new(RedisRepository)
 	restClient.config = config
 	restClient.client = redis.NewClient(&redis.Options{
 		Addr:     config.RedisDBAddr(),
@@ -23,26 +23,26 @@ func NewRedisDriver(config *util.Config) *RedisDriver {
 	return restClient
 }
 
-func (m *RedisDriver) StoreString(key string, value string) (err error) {
+func (m *RedisRepository) StoreString(key string, value string) (err error) {
 	ctx := context.Background()
 	err = m.client.Set(ctx, key, value, 0).Err()
 	return
 }
 
-func (m *RedisDriver) FetchString(key string) (value string, err error) {
+func (m *RedisRepository) FetchString(key string) (value string, err error) {
 	ctx := context.Background()
 	valuecdm := m.client.Get(ctx, key)
 	value, err = valuecdm.Result()
 	return
 }
-func (m *RedisDriver) StoreList(key string, values []string) (err error) {
+func (m *RedisRepository) StoreList(key string, values []string) (err error) {
 	ctx := context.Background()
 	err = m.client.Del(ctx, key).Err()
 	err = m.client.RPush(ctx, key, values).Err()
 	return
 }
 
-func (m *RedisDriver) FetchList(key string) (value []string, err error) {
+func (m *RedisRepository) FetchList(key string) (value []string, err error) {
 	ctx := context.Background()
 	value, err = m.client.LRange(ctx, key, 0, -1).Result()
 	return
