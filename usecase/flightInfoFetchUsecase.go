@@ -5,20 +5,19 @@ import (
 	"time"
 
 	"github.com/jbl1108/goFly/usecase/ports"
-	"github.com/jbl1108/goFly/util"
 	"go.uber.org/multierr"
 )
 
 type FlightInfoFetchUsecase struct {
 	flightPublisher ports.FlightPublisher
 	flightFetcher   ports.FlightFetcher
-	keyValueStore   ports.KeyValueStore
+	flightStorage   ports.FlightStorage
 	ticker          *time.Ticker
 }
 
-func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher ports.FlightPublisher, keyValueStore ports.KeyValueStore) *FlightInfoFetchUsecase {
+func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher ports.FlightPublisher, flightStorage ports.FlightStorage) *FlightInfoFetchUsecase {
 	newFlightInfoFetcherUseCase := new(FlightInfoFetchUsecase)
-	newFlightInfoFetcherUseCase.keyValueStore = keyValueStore
+	newFlightInfoFetcherUseCase.flightStorage = flightStorage
 	newFlightInfoFetcherUseCase.flightFetcher = flightFetcher
 	newFlightInfoFetcherUseCase.flightPublisher = flightPublisher
 	return newFlightInfoFetcherUseCase
@@ -27,7 +26,7 @@ func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher por
 func (fifu *FlightInfoFetchUsecase) Start() error {
 	var err = multierr.Combine(fifu.flightPublisher.Start(), fifu.flightFetcher.Start())
 	if err == nil {
-		fifu.ticker = time.NewTicker(3 * time.Second)
+		fifu.ticker = time.NewTicker(20 * time.Second)
 		go func() {
 			for range fifu.ticker.C {
 				fifu.Fetch()
@@ -42,12 +41,10 @@ func (fifu *FlightInfoFetchUsecase) Stop() {
 }
 
 func (fifu *FlightInfoFetchUsecase) Fetch() {
-	strStartDate, err1 := fifu.keyValueStore.FetchString(util.KEY_START_DATE)
-	strEndDate, err2 := fifu.keyValueStore.FetchString(util.KEY_END_DATE)
-	startDate, err3 := time.Parse(time.RFC3339, strStartDate)
-	endDate, err4 := time.Parse(time.RFC3339, strEndDate)
-	flights, err5 := fifu.keyValueStore.FetchList(util.KEY_FLIGTH)
-	errors := multierr.Combine(err1, err2, err3, err4, err5)
+	startDate, err1 := fifu.flightStorage.FetchStartDate()
+	endDate, err2 := fifu.flightStorage.FetchEndDate()
+	flights, err3 := fifu.flightStorage.GetAllFlights()
+	errors := multierr.Combine(err1, err2, err3)
 
 	if errors != nil {
 		log.Fatalf("error parsing date: %s", errors)

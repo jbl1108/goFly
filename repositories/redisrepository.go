@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jbl1108/goFly/util"
+	"go.uber.org/multierr"
 )
 
 type RedisRepository struct {
@@ -38,8 +39,14 @@ func (m *RedisRepository) FetchString(key string) (value string, err error) {
 func (m *RedisRepository) StoreList(key string, values []string) (err error) {
 	ctx := context.Background()
 	err = m.client.Del(ctx, key).Err()
+	err = multierr.Combine(err, m.client.RPush(ctx, key, values).Err())
+	return err
+}
+
+func (m *RedisRepository) AppendToList(key string, values []string) (err error) {
+	ctx := context.Background()
 	err = m.client.RPush(ctx, key, values).Err()
-	return
+	return err
 }
 
 func (m *RedisRepository) FetchList(key string) (value []string, err error) {

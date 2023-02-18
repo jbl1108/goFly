@@ -6,24 +6,30 @@ import (
 	"log"
 
 	"github.com/jbl1108/goFly/config"
+	"github.com/jbl1108/goFly/delivery"
 	"github.com/jbl1108/goFly/restservice"
 	"github.com/jbl1108/goFly/usecase"
+	"go.uber.org/multierr"
 )
 
-var newFlightInfoFetcher *usecase.FlightInfoFetchUsecase
+var flightInfoFetcher *usecase.FlightInfoFetchUsecase
+var flightInputService *delivery.FlightInputService
 
 func main() {
 
 	go restservice.Start()
-
-	newFlightInfoFetcher = config.NewFetchFlightUseCase()
-	err := newFlightInfoFetcher.Start()
+	app := config.NewApplication()
+	flightInfoFetcher = app.NewFetchFlightUseCase()
+	flightInputService = app.NewFlightInputservice()
+	//err1 := flightInfoFetcher.Start()
+	err2 := flightInputService.Start()
+	err := multierr.Append(err2, err2)
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		fmt.Println("Press the Enter Key to stop anytime")
 		fmt.Scanln()
-		newFlightInfoFetcher.Stop()
+		flightInfoFetcher.Stop()
 	}
 
 }

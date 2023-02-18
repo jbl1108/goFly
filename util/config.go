@@ -35,3 +35,7 @@ func (config *Config) FlightInfoKey() string {
 func (config *Config) RedisDBAddr() string {
 	return config.prop.GetString("redis_db_addr", "localhost:6379")
 }
+
+func (config *Config) RestServiceAddress() string {
+	return config.prop.GetString("rest_service_address", ":8000")
+}
