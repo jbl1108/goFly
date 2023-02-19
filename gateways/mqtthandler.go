@@ -1,4 +1,4 @@
-package delivery
+package gateways
 
 import (
 	"log"

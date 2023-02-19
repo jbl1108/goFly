@@ -18,6 +18,7 @@ type FlightInputService struct {
 	insertFlightUsecase usecase.InsertFlightUseCase
 	deleteFlightUsecase usecase.DeleteFlightUseCase
 	getFlightsUseCase   usecase.GetFlightsUseCase
+	webPage             *WebPage
 }
 
 func NewFlightInputService(config util.Config, insertFlightUsecase usecase.InsertFlightUseCase, deleteFlightUsecase usecase.DeleteFlightUseCase, getFlightsUseCase usecase.GetFlightsUseCase) *FlightInputService {
@@ -26,6 +27,7 @@ func NewFlightInputService(config util.Config, insertFlightUsecase usecase.Inser
 	fis.insertFlightUsecase = insertFlightUsecase
 	fis.deleteFlightUsecase = deleteFlightUsecase
 	fis.getFlightsUseCase = getFlightsUseCase
+	fis.webPage = NewWebpage()
 	return fis
 }
 
@@ -35,6 +37,8 @@ func (fis *FlightInputService) Start() error {
 		r.HandleFunc("/flights", fis.newFlight).Methods("POST")
 		r.HandleFunc("/flights/{id}", fis.delFlight).Methods("DELETE")
 		r.HandleFunc("/flights", fis.getFlights).Methods("GET")
+		r.HandleFunc("/", fis.showWebPage).Methods("GET")
+		r.HandleFunc("", fis.showWebPage).Methods("GET")
 		r.NotFoundHandler = http.HandlerFunc(fis.notFound)
 		err := http.ListenAndServe(fis.config.RestServiceAddress(), r)
 		if err != nil {
@@ -47,6 +51,7 @@ func (fis *FlightInputService) Start() error {
 
 func (fis *FlightInputService) notFound(w http.ResponseWriter, r *http.Request) {
 	log.Print("not found: " + r.RequestURI)
+	io.WriteString(w, "Page Not found: "+r.RequestURI)
 }
 
 func (fis *FlightInputService) newFlight(w http.ResponseWriter, r *http.Request) {
@@ -92,6 +97,17 @@ func (fis *FlightInputService) getFlights(w http.ResponseWriter, r *http.Request
 	} else {
 		io.WriteString(w, err.Error())
 	}
+}
+
+func (fis *FlightInputService) showWebPage(w http.ResponseWriter, r *http.Request) {
+	log.Print("showWebPage")
+	flights, err := fis.getFlightsUseCase.GetFlights()
+	if err == nil {
+		fis.webPage.Generate(w, flights)
+	} else {
+		io.WriteString(w, err.Error())
+	}
+
 }
 
 func (fis *FlightInputService) toJson(flights []string) string {

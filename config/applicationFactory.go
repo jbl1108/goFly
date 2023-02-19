@@ -41,13 +41,8 @@ func (app *applicationFactory) NewDeleteFlightUseCase() *usecase.DeleteFlightUse
 
 func (app *applicationFactory) NewFetchFlightUseCase() *usecase.FlightInfoFetchUsecase {
 	var restClient = gateways.NewRestClient()
-	var mqqtClient = delivery.NewMQTTCommunicator(app.config.MQTTAddr())
-	var mqqtFlightPublisher = delivery.NewFlightMQTTPublisher(app.config, mqqtClient)
+	var mqqtClient = gateways.NewMQTTCommunicator(app.config.MQTTAddr())
+	var mqqtFlightPublisher = gateways.NewFlightMQTTPublisher(app.config, mqqtClient)
 	var newFetchFlightInfoAdapter = gateways.NewFlightInfoFetcher(app.config, restClient)
-
-	//TODO: remove
-	app.keyValueStore.StoreString(util.KEY_START_DATE, util.DEFAULT_START_DATE)
-	app.keyValueStore.StoreString(util.KEY_END_DATE, util.DEFAULT_END_DATE)
-	app.keyValueStore.StoreList(util.KEY_FLIGTH, []string{util.DEFAULT_FLIGHT})
 	return usecase.NewFlightInfoFetcher(newFetchFlightInfoAdapter, mqqtFlightPublisher, app.flightStorage)
 }
