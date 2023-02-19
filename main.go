@@ -7,7 +7,6 @@ import (
 
 	"github.com/jbl1108/goFly/config"
 	"github.com/jbl1108/goFly/delivery"
-	"github.com/jbl1108/goFly/restservice"
 	"github.com/jbl1108/goFly/usecase"
 	"go.uber.org/multierr"
 )
@@ -17,7 +16,7 @@ var flightInputService *delivery.FlightInputService
 
 func main() {
 
-	go restservice.Start()
+	//go restservice.Start()
 	app := config.NewApplication()
 	flightInfoFetcher = app.NewFetchFlightUseCase()
 	flightInputService = app.NewFlightInputservice()
