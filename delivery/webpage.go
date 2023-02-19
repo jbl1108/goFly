@@ -7,6 +7,7 @@ import (
 
 type a struct {
 	Flights []string
+	Status  string
 }
 
 type WebPage struct {
@@ -17,10 +18,8 @@ func NewWebpage() *WebPage {
 	return fis
 }
 
-func (wp *WebPage) Generate(wr io.Writer, data any) {
-
-	var datas = &a{Flights: []string{"One", "Two", "Three"}}
-
+func (wp *WebPage) Generate(wr io.Writer, flights []string, status string) {
+	var datas = &a{Flights: flights, Status: status}
 	tpl := template.Must(template.ParseFiles("delivery/index.html"))
 	tpl.Execute(wr, datas)
 }

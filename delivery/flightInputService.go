@@ -35,7 +35,7 @@ func (fis *FlightInputService) Start() error {
 	go func() {
 		r := mux.NewRouter()
 		r.HandleFunc("/flights", fis.newFlight).Methods("POST")
-		r.HandleFunc("/flights/{id}", fis.delFlight).Methods("DELETE")
+		r.HandleFunc("/delflight", fis.delFlight).Methods("POST")
 		r.HandleFunc("/flights", fis.getFlights).Methods("GET")
 		r.HandleFunc("/", fis.showWebPage).Methods("GET")
 		r.HandleFunc("", fis.showWebPage).Methods("GET")
@@ -58,34 +58,37 @@ func (fis *FlightInputService) newFlight(w http.ResponseWriter, r *http.Request)
 	err1 := r.ParseForm()
 	flight := r.Form.Get("flight")
 	if flight == "" {
-		io.WriteString(w, "flight parameter missing!")
+		fis.generateWebPage(w, "flight parameter missing!")
 	} else {
 		if err1 == nil {
 			err2 := fis.insertFlightUsecase.InsertFlight(flight, time.Now())
 			if err2 == nil {
-				io.WriteString(w, "OK")
+				fis.generateWebPage(w, "flightAdded")
 			} else {
-				io.WriteString(w, err2.Error())
+				fis.generateWebPage(w, err2.Error())
 			}
 		} else {
-			io.WriteString(w, err1.Error())
+			fis.generateWebPage(w, err1.Error())
 		}
 	}
 }
 
 func (fis *FlightInputService) delFlight(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	flight := vars["id"]
+	err1 := r.ParseForm()
+	flight := r.Form.Get("flight")
 	if flight == "" {
-		io.WriteString(w, "flight parameter missing!")
+		fis.generateWebPage(w, "flight parameter missing!")
 	} else {
-		err := fis.deleteFlightUsecase.DeleteFlight(flight)
-		if err == nil {
-			io.WriteString(w, "OK")
+		if err1 == nil {
+			err2 := fis.deleteFlightUsecase.DeleteFlight(flight)
+			if err2 == nil {
+				fis.generateWebPage(w, "flightDeleted")
+			} else {
+				fis.generateWebPage(w, err2.Error())
+			}
 		} else {
-			io.WriteString(w, err.Error())
+			fis.generateWebPage(w, err1.Error())
 		}
-
 	}
 }
 
@@ -101,13 +104,16 @@ func (fis *FlightInputService) getFlights(w http.ResponseWriter, r *http.Request
 
 func (fis *FlightInputService) showWebPage(w http.ResponseWriter, r *http.Request) {
 	log.Print("showWebPage")
+	fis.generateWebPage(w, "")
+}
+
+func (fis *FlightInputService) generateWebPage(w io.Writer, status string) {
 	flights, err := fis.getFlightsUseCase.GetFlights()
 	if err == nil {
-		fis.webPage.Generate(w, flights)
+		fis.webPage.Generate(w, flights, status)
 	} else {
 		io.WriteString(w, err.Error())
 	}
-
 }
 
 func (fis *FlightInputService) toJson(flights []string) string {

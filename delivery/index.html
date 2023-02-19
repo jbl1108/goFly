@@ -5,22 +5,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>News App Demo</title>
+    <title>Flight app</title>
     <link rel="stylesheet" href="/assets/style.css" />
 </head>
 <body>
     <main>
         <header>
-            <a class="logo" href="/">News Demo</a>
-            <form action="/flight" method="POST">
+            <form action="/flights" method="POST">
                 <input autofocus class="flight-input" value="" placeholder="e.g: KL300" type="flight"
-                    name="f" />
+                    name="flight" />
+                <input type="submit" value="Add">
             </form>
-            <a href="https://github.com/freshman-tech/news" class="button github-button">View on GitHub</a>
+            <form action="/delflight" method="POST">
+                <input autofocus class="flight-input" value="" placeholder="e.g: KL300" type="flight"
+                    name="flight" />
+                <input type="submit" value="Delete">
+            </form>
         </header>
     </main>
+    <p>Status: {{.Status}}</p>
     {{range $i, $a := .Flights}}
+    <p>
     Flights: {{$a}}
-  {{end}}`
+    </p>
+    {{end}}
 </body>
 </html>
