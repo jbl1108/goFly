@@ -29,6 +29,10 @@ func (frs *FlightRepository) FetchStartDate() (time.Time, error) {
 	}
 
 }
+func (frs *FlightRepository) StoreEndDate(endDate time.Time) error {
+	strEndDate := endDate.Format(time.RFC3339)
+	return frs.keyValueStore.StoreString(util.KEY_END_DATE, strEndDate)
+}
 func (frs *FlightRepository) FetchEndDate() (time.Time, error) {
 	endDate, err := frs.keyValueStore.FetchString(util.KEY_END_DATE)
 	if err == nil {

@@ -21,9 +21,9 @@ func main() {
 	app := config.NewApplication()
 	flightInfoFetcher = app.NewFetchFlightUseCase()
 	flightInputService = app.NewFlightInputservice()
-	//err1 := flightInfoFetcher.Start()
+	err1 := flightInfoFetcher.Start()
 	err2 := flightInputService.Start()
-	err := multierr.Append(err2, err2)
+	err := multierr.Append(err1, err2)
 	if err != nil {
 		log.Fatal(err)
 	} else {

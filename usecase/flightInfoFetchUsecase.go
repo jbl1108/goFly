@@ -24,9 +24,19 @@ func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher por
 }
 
 func (fifu *FlightInfoFetchUsecase) Start() error {
+	_, err1 := fifu.flightStorage.FetchStartDate()
+	if err1 != nil {
+		fifu.flightStorage.StoreStartDate(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC))
+	}
+	_, err2 := fifu.flightStorage.FetchEndDate()
+
+	if err2 != nil {
+		fifu.flightStorage.StoreEndDate(time.Now())
+	}
+
 	var err = multierr.Combine(fifu.flightPublisher.Start(), fifu.flightFetcher.Start())
 	if err == nil {
-		fifu.ticker = time.NewTicker(20 * time.Second)
+		fifu.ticker = time.NewTicker(10 * time.Second)
 		go func() {
 			for range fifu.ticker.C {
 				fifu.Fetch()
@@ -43,6 +53,7 @@ func (fifu *FlightInfoFetchUsecase) Stop() {
 func (fifu *FlightInfoFetchUsecase) Fetch() {
 	startDate, err1 := fifu.flightStorage.FetchStartDate()
 	endDate, err2 := fifu.flightStorage.FetchEndDate()
+
 	flights, err3 := fifu.flightStorage.GetAllFlights()
 	errors := multierr.Combine(err1, err2, err3)
 
@@ -50,6 +61,9 @@ func (fifu *FlightInfoFetchUsecase) Fetch() {
 		log.Fatalf("error parsing date: %s", errors)
 	}
 	fifu.fetchFlights(flights, startDate, endDate)
+
+	fifu.flightStorage.StoreStartDate(time.Now().Add(time.Duration(-24) * time.Hour))
+	fifu.flightStorage.StoreEndDate(time.Now())
 }
 
 func (fifu *FlightInfoFetchUsecase) fetchFlights(flightCodes []string, startDate time.Time, endDate time.Time) {
