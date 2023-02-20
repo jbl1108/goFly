@@ -39,3 +39,7 @@ func (config *Config) RedisDBAddr() string {
 func (config *Config) RestServiceAddress() string {
 	return config.prop.GetString("rest_service_address", ":8000")
 }
+
+func (config *Config) RestFlightFetchIntervalDays() int {
+	return config.prop.GetInt("flight_fetch_interval_days", 1)
+}

@@ -7,6 +7,8 @@ import (
 	"github.com/jbl1108/goFly/util"
 )
 
+const DATE_FORMAT = "2006-01-02"
+
 type flightInfoFetcher struct {
 	restClient *RestClient
 	config     *util.Config
@@ -25,8 +27,10 @@ func (m *flightInfoFetcher) Start() error {
 
 func (m *flightInfoFetcher) SendFlightRequest(flightCode string, startDate time.Time, endDate time.Time) ([]model.FlightData, error) {
 	parser := NewFlightDataParser()
-	var request = m.config.FlightInfoRequest() + "/" + flightCode + "?start=" + startDate.Format(time.RFC3339) + "&end=" + endDate.Format(time.RFC3339)
-	response, err := m.restClient.Request(request, map[string]string{"x-key": m.config.FlightInfoKey()})
+
+	var request = m.config.FlightInfoRequest() + "/" + flightCode + "?start=" + startDate.Format(DATE_FORMAT) + "&end=" + endDate.Format(DATE_FORMAT)
+	response, err := m.restClient.Request(request, map[string]string{"x-apikey": m.config.FlightInfoKey()})
+
 	if err != nil {
 		return nil, err
 	} else {

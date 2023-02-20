@@ -40,7 +40,7 @@ func (m *RestClient) Request(url string, header map[string]string) (result Messa
 	if err != nil {
 		fmt.Println(err.Error())
 	} else if resp.StatusCode > 299 || resp.StatusCode < 200 {
-		err = fmt.Errorf("error: response returned: %s", resp.Status)
+		err = fmt.Errorf("error: response returned: %s. Details: %s", resp.Status, body)
 	} else {
 		result = make(map[string]string, 0)
 		err = json.Unmarshal(body, &result)

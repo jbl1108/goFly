@@ -27,6 +27,10 @@ func (app *applicationFactory) NewFlightInputservice() *delivery.FlightInputServ
 	return delivery.NewFlightInputService(*app.config, *usecase.NewInsertFlightUseCase(app.flightStorage), *usecase.NewDeleteFlightUseCase(app.flightStorage), *usecase.NewGetFlightsUseCase(app.flightStorage))
 }
 
+func (app *applicationFactory) NewFlightFetchService() *delivery.FligthFetchService {
+	return delivery.NewFligthFetchService(*app.config, *app.NewFetchFlightUseCase())
+}
+
 func (app *applicationFactory) GetInsertFlightsUseCase() *usecase.GetFlightsUseCase {
 	return usecase.NewGetFlightsUseCase(app.flightStorage)
 }

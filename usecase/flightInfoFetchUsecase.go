@@ -12,7 +12,6 @@ type FlightInfoFetchUsecase struct {
 	flightPublisher ports.FlightPublisher
 	flightFetcher   ports.FlightFetcher
 	flightStorage   ports.FlightStorage
-	ticker          *time.Ticker
 }
 
 func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher ports.FlightPublisher, flightStorage ports.FlightStorage) *FlightInfoFetchUsecase {
@@ -34,20 +33,7 @@ func (fifu *FlightInfoFetchUsecase) Start() error {
 		fifu.flightStorage.StoreEndDate(time.Now())
 	}
 
-	var err = multierr.Combine(fifu.flightPublisher.Start(), fifu.flightFetcher.Start())
-	if err == nil {
-		fifu.ticker = time.NewTicker(10 * time.Second)
-		go func() {
-			for range fifu.ticker.C {
-				fifu.Fetch()
-			}
-		}()
-	}
-	return err
-}
-
-func (fifu *FlightInfoFetchUsecase) Stop() {
-	fifu.ticker.Stop()
+	return multierr.Combine(fifu.flightPublisher.Start(), fifu.flightFetcher.Start())
 }
 
 func (fifu *FlightInfoFetchUsecase) Fetch() {
