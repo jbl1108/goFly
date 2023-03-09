@@ -1,6 +1,11 @@
 package util
 
 import (
+	"log"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/magiconair/properties"
 )
 
@@ -12,7 +17,23 @@ const CONFIG_FILE = "config.conf"
 
 func NewConfig() *Config {
 	c := new(Config)
-	c.prop = properties.MustLoadFile("${HOME}/"+CONFIG_FILE, properties.UTF8)
+
+	configPath := os.Getenv("HOME")
+	if configPath != "" && !strings.HasSuffix(configPath, "/") {
+		configPath = configPath + "/" + CONFIG_FILE
+	} else {
+		configPath = configPath + CONFIG_FILE
+	}
+	log.Printf("Loading config file from %s", configPath)
+	c.prop = properties.MustLoadFile(configPath, properties.UTF8)
+	log.Println("flight_info_request=" + c.FlightInfoRequest())
+	log.Println("mqtt_host=" + c.MQTTAddr())
+	log.Println("mqtt_topic=" + c.MQTTTopic())
+	log.Println("flight_info_key=" + c.FlightInfoKey())
+	log.Println("redis_db_addr=" + c.RedisDBAddr())
+	log.Println("rest_service_address=" + c.RestServiceAddress())
+	log.Println("flight_fetch_interval_days=" + strconv.Itoa(c.RestFlightFetchIntervalDays()))
+
 	return c
 }
 

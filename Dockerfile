@@ -14,6 +14,7 @@ COPY ./usecase/*.go /go/src/github.com/jbl1108/gofly/usecase/
 COPY ./usecase/ports/*.go /go/src/github.com/jbl1108/gofly/usecase/ports/
 COPY ./model/*.go /go/src/github.com/jbl1108/gofly/model/
 COPY ./util/*.go /go/src/github.com/jbl1108/gofly/util/
+COPY ./config.conf /go/src/github.com/jbl1108/gofly/
 
 WORKDIR /go/src/github.com/jbl1108/gofly
 RUN ls -s
@@ -27,9 +28,10 @@ RUN go get github.com/jbl1108/goFly/config
 RUN go get github.com/jbl1108/goFly/util
 #RUN dep ensure -vendor-only
 
-RUN go build -o /bin/github/jbl1108/gofly
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o app .
 
 FROM scratch
-COPY --from=build /bin/github/jbl1108/gofly /bin/github/jbl1108/gofly
-ENTRYPOINT ["/bin/github/jbl1108/gofly"]
-CMD ["--help"]
+WORKDIR /root/
+COPY --from=build /go/src/github.com/jbl1108/gofly/app ./
+COPY --from=build /go/src/github.com/jbl1108/gofly/config.conf ./
+CMD ["./app"]

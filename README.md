@@ -7,3 +7,7 @@ This is the readme file for goFly
  - MQTT_ADDR : e.g: localhost:1883
  - MQTT_TOPIC : e.g: flights
  - REDIS_ADDR : e.g: localhost:6379
+ - HOME : load config from: ß$HOME/config.conf
+ - FLIGHT_FETCH_INTERVAL_DAYS : e.g. 1 
+ - REST_SERVICE_ADDRESS
+ 
