@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Flight app</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+    <main>
+        <header>
+            <form action="/flights" method="POST">
+                <input autofocus class="flight-input" value="" placeholder="e.g: KL300" type="flight"
+                    name="flight" />
+                <input type="submit" value="Add">
+            </form>
+            <form action="/delflight" method="POST">
+                <input autofocus class="flight-input" value="" placeholder="e.g: KL300" type="flight"
+                    name="flight" />
+                <input type="submit" value="Delete">
+            </form>
+            <form action="/fetch" method="POST">
+                <input type="submit" value="Fetch">
+            </form>
+        </header>
+    </main>
+    <p>Status: {{.Status}}</p>
+    {{range $i, $a := .Flights}}
+    <p>
+    Flights: {{$a}}
+    </p>
+    {{end}}
+</body>
+</html>
