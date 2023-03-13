@@ -15,6 +15,7 @@ COPY ./usecase/ports/*.go /go/src/github.com/jbl1108/gofly/usecase/ports/
 COPY ./model/*.go /go/src/github.com/jbl1108/gofly/model/
 COPY ./util/*.go /go/src/github.com/jbl1108/gofly/util/
 COPY ./config.conf /go/src/github.com/jbl1108/gofly/
+COPY ./*.html /go/src/github.com/jbl1108/gofly/
 
 WORKDIR /go/src/github.com/jbl1108/gofly
 RUN ls -s
@@ -34,4 +35,6 @@ FROM scratch
 WORKDIR /root/
 COPY --from=build /go/src/github.com/jbl1108/gofly/app ./
 COPY --from=build /go/src/github.com/jbl1108/gofly/config.conf ./
+COPY --from=build /go/src/github.com/jbl1108/gofly/index.html ./
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 CMD ["./app"]

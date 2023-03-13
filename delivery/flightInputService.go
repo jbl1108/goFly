@@ -14,19 +14,21 @@ import (
 )
 
 type FlightInputService struct {
-	config              util.Config
-	insertFlightUsecase usecase.InsertFlightUseCase
-	deleteFlightUsecase usecase.DeleteFlightUseCase
-	getFlightsUseCase   usecase.GetFlightsUseCase
-	webPage             *WebPage
+	config                 util.Config
+	insertFlightUsecase    usecase.InsertFlightUseCase
+	deleteFlightUsecase    usecase.DeleteFlightUseCase
+	getFlightsUseCase      usecase.GetFlightsUseCase
+	fetchFlightInfoUseCase usecase.FlightInfoFetchUsecase
+	webPage                *WebPage
 }
 
-func NewFlightInputService(config util.Config, insertFlightUsecase usecase.InsertFlightUseCase, deleteFlightUsecase usecase.DeleteFlightUseCase, getFlightsUseCase usecase.GetFlightsUseCase) *FlightInputService {
+func NewFlightInputService(config util.Config, insertFlightUsecase usecase.InsertFlightUseCase, deleteFlightUsecase usecase.DeleteFlightUseCase, getFlightsUseCase usecase.GetFlightsUseCase, fetchFlightInfoUseCase usecase.FlightInfoFetchUsecase) *FlightInputService {
 	fis := new(FlightInputService)
 	fis.config = config
 	fis.insertFlightUsecase = insertFlightUsecase
 	fis.deleteFlightUsecase = deleteFlightUsecase
 	fis.getFlightsUseCase = getFlightsUseCase
+	fis.fetchFlightInfoUseCase = fetchFlightInfoUseCase
 	fis.webPage = NewWebpage()
 	return fis
 }
@@ -36,6 +38,7 @@ func (fis *FlightInputService) Start() error {
 		r := mux.NewRouter()
 		r.HandleFunc("/flights", fis.newFlight).Methods("POST")
 		r.HandleFunc("/delflight", fis.delFlight).Methods("POST")
+		r.HandleFunc("/fetch", fis.fetchFlight).Methods("POST")
 		r.HandleFunc("/flights", fis.getFlights).Methods("GET")
 		r.HandleFunc("/", fis.showWebPage).Methods("GET")
 		r.HandleFunc("", fis.showWebPage).Methods("GET")
@@ -52,6 +55,11 @@ func (fis *FlightInputService) Start() error {
 func (fis *FlightInputService) notFound(w http.ResponseWriter, r *http.Request) {
 	log.Print("not found: " + r.RequestURI)
 	io.WriteString(w, "Page Not found: "+r.RequestURI)
+}
+
+func (fis *FlightInputService) fetchFlight(w http.ResponseWriter, r *http.Request) {
+	err := fis.fetchFlightInfoUseCase.Fetch()
+	fis.generateWebPage(w, err.Error())
 }
 
 func (fis *FlightInputService) newFlight(w http.ResponseWriter, r *http.Request) {

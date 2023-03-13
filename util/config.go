@@ -26,6 +26,7 @@ func NewConfig() *Config {
 	}
 	log.Printf("Loading config file from %s", configPath)
 	c.prop = properties.MustLoadFile(configPath, properties.UTF8)
+	log.SetPrefix("Config : ")
 	log.Println("flight_info_request=" + c.FlightInfoRequest())
 	log.Println("mqtt_host=" + c.MQTTAddr())
 	log.Println("mqtt_topic=" + c.MQTTTopic())
@@ -42,7 +43,7 @@ func (config *Config) FlightInfoRequest() string {
 }
 
 func (config *Config) MQTTAddr() string {
-	return config.prop.GetString("mqtt_host", "localhost:1883")
+	return config.prop.GetString("mqtt_addr", "localhost:1883")
 }
 
 func (config *Config) MQTTTopic() string {

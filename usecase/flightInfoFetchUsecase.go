@@ -12,6 +12,7 @@ type FlightInfoFetchUsecase struct {
 	flightPublisher ports.FlightPublisher
 	flightFetcher   ports.FlightFetcher
 	flightStorage   ports.FlightStorage
+	log             *log.Logger
 }
 
 func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher ports.FlightPublisher, flightStorage ports.FlightStorage) *FlightInfoFetchUsecase {
@@ -19,6 +20,8 @@ func NewFlightInfoFetcher(flightFetcher ports.FlightFetcher, flightPublisher por
 	newFlightInfoFetcherUseCase.flightStorage = flightStorage
 	newFlightInfoFetcherUseCase.flightFetcher = flightFetcher
 	newFlightInfoFetcherUseCase.flightPublisher = flightPublisher
+	newFlightInfoFetcherUseCase.log = log.Default()
+	newFlightInfoFetcherUseCase.log.SetPrefix("FlightInfoFetchUsecase : ")
 	return newFlightInfoFetcherUseCase
 }
 
@@ -36,7 +39,7 @@ func (fifu *FlightInfoFetchUsecase) Start() error {
 	return multierr.Combine(fifu.flightPublisher.Start(), fifu.flightFetcher.Start())
 }
 
-func (fifu *FlightInfoFetchUsecase) Fetch() {
+func (fifu *FlightInfoFetchUsecase) Fetch() error {
 	startDate, err1 := fifu.flightStorage.FetchStartDate()
 	endDate, err2 := fifu.flightStorage.FetchEndDate()
 
@@ -50,6 +53,7 @@ func (fifu *FlightInfoFetchUsecase) Fetch() {
 
 	fifu.flightStorage.StoreStartDate(time.Now().Add(time.Duration(-24) * time.Hour))
 	fifu.flightStorage.StoreEndDate(time.Now())
+	return errors
 }
 
 func (fifu *FlightInfoFetchUsecase) fetchFlights(flightCodes []string, startDate time.Time, endDate time.Time) {
@@ -63,13 +67,13 @@ func (fifu *FlightInfoFetchUsecase) fetchFlights(flightCodes []string, startDate
 			if len(flightData) != 0 {
 				err = fifu.flightPublisher.PostMessage(flightData)
 				if err != nil {
-					log.Fatalf("Error posting message: %s", err.Error())
+					fifu.log.Printf("Error posting message: %s", err.Error())
 				}
 
 			}
-			log.Printf("Fetched %o flights", len(flightData))
+			fifu.log.Printf("Fetched %o flights", len(flightData))
 		} else {
-			log.Fatalf("Fetch fligth error %s", err.Error())
+			fifu.log.Printf("Fetch fligth error %s", err.Error())
 		}
 
 	}

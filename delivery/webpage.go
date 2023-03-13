@@ -20,6 +20,6 @@ func NewWebpage() *WebPage {
 
 func (wp *WebPage) Generate(wr io.Writer, flights []string, status string) {
 	var datas = &a{Flights: flights, Status: status}
-	tpl := template.Must(template.ParseFiles("delivery/index.html"))
+	tpl := template.Must(template.ParseFiles("index.html"))
 	tpl.Execute(wr, datas)
 }

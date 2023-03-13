@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jbl1108/goFly/config"
@@ -25,9 +24,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println("Press the Enter Key to stop anytime")
-		fmt.Scanln()
-		flightInfoFetchService.Stop()
+		select {}
+		//Wait forever
 	}
 
 }

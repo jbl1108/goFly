@@ -10,9 +10,10 @@ import (
 )
 
 type applicationFactory struct {
-	config        *util.Config
-	keyValueStore repositories.KeyValueStore
-	flightStorage ports.FlightStorage
+	config                 *util.Config
+	keyValueStore          repositories.KeyValueStore
+	flightStorage          ports.FlightStorage
+	flightInfoFetchUsecase *usecase.FlightInfoFetchUsecase
 }
 
 func NewApplication() *applicationFactory {
@@ -20,11 +21,12 @@ func NewApplication() *applicationFactory {
 	app.config = util.NewConfig()
 	app.keyValueStore = repositories.NewRedisRepository(app.config)
 	app.flightStorage = repositories.NewFlightRepository(app.keyValueStore)
+	app.flightInfoFetchUsecase = app.NewFetchFlightUseCase()
 	return app
 }
 
 func (app *applicationFactory) NewFlightInputservice() *delivery.FlightInputService {
-	return delivery.NewFlightInputService(*app.config, *usecase.NewInsertFlightUseCase(app.flightStorage), *usecase.NewDeleteFlightUseCase(app.flightStorage), *usecase.NewGetFlightsUseCase(app.flightStorage))
+	return delivery.NewFlightInputService(*app.config, *usecase.NewInsertFlightUseCase(app.flightStorage), *usecase.NewDeleteFlightUseCase(app.flightStorage), *usecase.NewGetFlightsUseCase(app.flightStorage), *app.flightInfoFetchUsecase)
 }
 
 func (app *applicationFactory) NewFlightFetchService() *delivery.FligthFetchService {
