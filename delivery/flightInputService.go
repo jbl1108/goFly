@@ -59,7 +59,11 @@ func (fis *FlightInputService) notFound(w http.ResponseWriter, r *http.Request) 
 
 func (fis *FlightInputService) fetchFlight(w http.ResponseWriter, r *http.Request) {
 	err := fis.fetchFlightInfoUseCase.Fetch()
-	fis.generateWebPage(w, err.Error())
+	var status = ""
+	if(err != nil){
+		status = err.Error()
+	}
+	fis.generateWebPage(w, status)
 }
 
 func (fis *FlightInputService) newFlight(w http.ResponseWriter, r *http.Request) {
